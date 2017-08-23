@@ -1,0 +1,6 @@
+aiplay-webserver
+local_config.py
+_test/
+testlib/build/
+.idea/
+*.pyc
