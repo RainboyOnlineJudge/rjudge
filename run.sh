@@ -20,7 +20,8 @@ n=$(($core*2))
 chmod 777 /judge_server/data/
 # rsync 的密码,
 echo "server:5978" >/etc/rsyncd.secrets
-/etc/init.d/rsync start
+# 启动rsync
+rsync --daemon --config=/etc/rsyncd.conf
 
 redis-server &
 celery worker -A config.celery &

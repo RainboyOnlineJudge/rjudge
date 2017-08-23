@@ -17,7 +17,7 @@ vim run.sh
  1.clone这个代码,安装docker,可以使用`aliyun`的docker[加速器](https://cr.console.aliyun.com/?spm=5176.100239.blogcont29941.12.fOsBW8)
  2. 修改rsync,token的相关参数,建立data文件夹
  3. 输入命令:`docker build -t rjudge .`,创建images
- 4. `sudo docker run -it -v {你的data地址}:/judge_server/data -p 4999:4999 -p 8080:873 rjudge -d`
+ 4. `sudo docker run -it -v {你的data地址}:/judge_server/data -p 4999:4999 -p 873:873 -d rjudge`
 
 ## 特性
 
@@ -26,30 +26,84 @@ vim run.sh
  - 定时删除不用的测试文件
  - 使用qdoj的测评机为后台
 
-### Token:
 
-Token is required for all requests. Using `requests` library, this part comes naturally.
+# 安装方法
 
-### Upload Data:
+## 1.修改Token:
 
-The data zipfile should be named `<pid>-<md5>.zip`, wrapping all data files and a compiled special judge (possibly) directly under the zipfile.
-
-With token combined, this part looks like this:
-```python
-def add_listdir_to_file(source_dir, target_path):
-    import zipfile
-    f = zipfile.ZipFile(target_path, 'w', zipfile.ZIP_DEFLATED)
-    for filename in os.listdir(source_dir):
-        real_path = os.path.join(source_dir, filename)
-        if os.path.isfile(real_path):
-            f.write(real_path, arcname=filename)
-    f.close()
+在run.sh里修改token
 ```
-```python
-requests.post(url, data=f.read(), auth=('token', TOKEN)).json()
+#修改token为你自己的token
+echo "mytoken" > /var/www/rjudge/token.txt
 ```
 
-## 发送评测数据
+## 2.修改rsync的密码
+
+在`run.sh`里
+
+## 上传数据:
+
+使用`rsync`来上传数据
+
+```
+# rsync 的密码,
+echo "server:5978" >/etc/rsyncd.secrets
+```
+
+### 同步数据的方法1:使用rsync
+
+```
+sudo echo 5978 > /etc/rsyncd.secret
+sudo chmod 600 /etc/rsyncd.secret
+sudo chown root:root /etc/rsyncd.secret
+sudo rsync --port 8080 --password-file=/etc/rsyncd.secret -av /databack/ server@<ip>::data
+```
+
+### 同步数据的方法:使用lsync
+
+使用lsync可以自动同步
+
+ubuntu 下安装lsyncd
+
+```
+sudo apt-get install lsyncd
+```
+
+/etc/lsyncd.conf
+```
+settings {
+    logfile      ="/var/log/lsyncd.log",
+    statusFile   ="/tmp/lsyncd.status",
+    inotifyMode  = "CloseWrite",
+    maxProcesses = 10,
+    statusInterval = 1
+}
+
+sync {
+    default.rsync,
+    source    = "/home/server1/test/data/",
+    target    = "server@localhost::data",
+    delay     = 15,
+    rsync     = {
+        binary    = "/usr/bin/rsync",
+        archive   = true,
+        compress  = true,
+        verbose   = true,
+        password_file = "/home/server1/test/rsyncd.secret"
+    }
+}
+```
+
+启动:`sudo lsyncd  /etc/lsyncd.conf`
+
+根据你的实际情况修改参数
+
+参数的含义请看:https://axkibe.github.io/lsyncd/manual/config/layer4/
+
+## 请求测试的方法
+
+
+先同步评测数据,然后使用http的post方法请求评测
 
 **注意:**所有的请求头都要带有一个`token`头,
 
