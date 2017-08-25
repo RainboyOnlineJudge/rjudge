@@ -12,12 +12,16 @@ vim run.sh
 
 ## 安装:
 
-基本如下:
+基本过程如下:
 
- 1.clone这个代码,安装docker,可以使用`aliyun`的docker[加速器](https://cr.console.aliyun.com/?spm=5176.100239.blogcont29941.12.fOsBW8)
+ 1. clone这个代码,安装docker,可以使用`aliyun`的docker[加速器](https://cr.console.aliyun.com/?spm=5176.100239.blogcont29941.12.fOsBW8)
  2. 修改rsync,token的相关参数,建立data文件夹
+  - 修改`run.sh`下的rsync的用户和密码
+  - 修改`run.sh`下的token的密码
  3. 输入命令:`docker build -t rjudge .`,创建images
  4. `sudo docker run -it -v {你的data地址}:/judge_server/data -p 4999:4999 -p 873:873 -d rjudge`
+
+具体安装方法看下面
 
 ## 特性
 
@@ -25,22 +29,26 @@ vim run.sh
  - 使用token
  - 定时删除不用的测试文件
  - 使用qdoj的测评机为后台
+ - 使用celery作为评测队列
 
-
-# 安装方法
+# 安装与使用
 
 ## 1.修改Token:
 
 在run.sh里修改token
 ```
-#修改token为你自己的token
+#修改mytoken为你自己的token
 echo "mytoken" > /var/www/rjudge/token.txt
 ```
 
 ## 2.修改rsync的密码
 
-在`run.sh`里
+在`run.sh`里修改rsync的用户与密码
 
+```
+# rsync 的密码,
+echo "server:5978" >/etc/rsyncd.secrets
+```
 ## 上传数据:
 
 使用`rsync`来上传数据
