@@ -53,6 +53,7 @@ echo "server:5978" >/etc/rsyncd.secrets
 
 使用`rsync`来上传数据
 
+修改`run.sh`里的rsync用户和密码
 ```
 # rsync 的密码,
 echo "server:5978" >/etc/rsyncd.secrets
@@ -60,7 +61,9 @@ echo "server:5978" >/etc/rsyncd.secrets
 
 ### 同步数据的方法1:使用rsync
 
+
 ```
+#建立一个密码文件
 sudo echo 5978 > /etc/rsyncd.secret
 sudo chmod 600 /etc/rsyncd.secret
 sudo chown root:root /etc/rsyncd.secret
@@ -77,7 +80,16 @@ ubuntu 下安装lsyncd
 sudo apt-get install lsyncd
 ```
 
-/etc/lsyncd.conf
+```
+#建立一个密码文件
+sudo echo 5978 > /etc/rsyncd.secret
+# 密码文件可以不在这个路径
+sudo chmod 600 /etc/rsyncd.secret
+sudo chown root:root /etc/rsyncd.secret
+```
+
+配置文件`/etc/lsyncd.conf`
+
 ```
 settings {
     logfile      ="/var/log/lsyncd.log",
@@ -97,7 +109,7 @@ sync {
         archive   = true,
         compress  = true,
         verbose   = true,
-        password_file = "/home/server1/test/rsyncd.secret"
+        password_file = "/etc/rsyncd.secret"
     }
 }
 ```
@@ -115,6 +127,7 @@ sync {
 
 **注意:**所有的请求头都要带有一个`token`头,
 
+使用`nodejs`的`requests`模块
 ```node
 headers = {
   token:"your_token"
@@ -138,6 +151,34 @@ requests.post(url, json=data, headers).json()
   }
 }
 ```
+
+### 请求数据的含义
+
+ - `lang`:请求评测代码的类型,可以是:
+   - `c`:c语言
+   - `cpp`:c++语言
+   - `pas`:pascal语言
+ - `code`:请求评测的代码内容
+ - `max_time`:最大时间限制,单位`ms`
+ - `max_memroy`:最大内存限制,单位`mb`
+ - `problem_id`:测试数据的id,默认的数据文件夹:`/judge_server/data/`,如果`problem_id:1000`,为会就会去找`/judge_server/data/1000/`下面的测试数据
+
+### 测试数据命名规范
+
+输入文件:`<name><num>.in`,
+输出文件:`<name><num>.out`
+
+其中`<num>`可以从`0`或`1`开始,文件的格式:`unix`,编码:`utf-8 无bom`
+
+
+比如下面的命名是正确的
+```
+aplusb1.in aplusb1.out
+aplusb2.in aplusb2.out
+aplusb3.in aplusb3.out
+```
+
+**高级**:具体分析数据文件名的代码在:`core/utils.py`里的`import_data`函数
 
 ### 返回数据
 
@@ -187,6 +228,38 @@ SUM_TIME_LIMIT_EXCEEDED = 8
 
 Okay, that pretty much nails it! Good luck!
 
-## 有关rsync自动同步
 
-docker中使用了rsync-server,另一端使用lsyncd来**监视本地文件,自动发送到远程rsync-server的相应文件夹下**
+## 评测机运行流程图
+
+**http请求过程**
+
+![1](doc/过程1.png)
+
+**测评过程**
+
+其中`roundsetting`主要是产生各种参数,产生的参数如下
+
+ - `revert`
+ - `r_url`
+ - `judge_indicator`
+ - `code`
+ - `max_time`
+ - `max_memory`
+ - `problem_id`
+ - `round_id`:一个随机的字符串,`Handler`类初始化时传递过来
+ - `data_dir`:和`problem_id`行成的评测数据路径
+ - `round_dir`:和`round_id`行成的临时测评路径
+ - `language_settings`:`languages.py`里对应的语言设定
+ - `src_name`
+ - `exe_name`
+ - `src_path`
+ - `exe_path`
+ - `compile_out_path`
+ - `compile_log_path`
+ - `compile_cmd`
+ - `seccomp_rule_name`
+
+如果没有找到`data_dir`对应的路径,会出错
+
+
+![2]()
