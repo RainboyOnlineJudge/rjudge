@@ -70,7 +70,7 @@ sudo chown root:root /etc/rsyncd.secret
 sudo rsync --port 8080 --password-file=/etc/rsyncd.secret -av /databack/ server@<ip>::data
 ```
 
-### 同步数据的方法:使用lsync
+### 同步数据的方法2:使用lsync
 
 使用lsync可以自动同步
 
