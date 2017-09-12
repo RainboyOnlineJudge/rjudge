@@ -39,7 +39,7 @@ def run_judge(not_use,config_data,key,val,count):
     result = _judger.run(**_run_args(config_data,in_path, out_path, log_path))
     
     if( (result["result"] == 0  or result["result"] == RUNTIME_ERROR  ) and
-            result["memory"] > config_data["memory"]*1024*1024):
+            result["memory"] > config_data["max_memory"]*1024*1024):
         result["result"]  = MEMORY_LIMIT_EXCEEDED;
     # A fake time limit / memory limit exceeded
     if result['cpu_time'] > config_data["max_time"] or result['result'] == CPU_TIME_LIMIT_EXCEEDED \

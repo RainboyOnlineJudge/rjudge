@@ -19,7 +19,7 @@ vim run.sh
   - 修改`run.sh`下的rsync的用户和密码
   - 修改`run.sh`下的token的密码
  3. 输入命令:`docker build -t rjudge .`,创建images
- 4. `sudo docker run -it -v {你的data地址}:/judge_server/data -p 4999:4999 -p 873:873 -d rjudge`
+ 4. `sudo docker run --net=host -it -v {你的data地址}:/judge_server/data -p 4999:4999 -p 873:873 -d rjudge`
 
 具体安装方法看下面
 
@@ -140,7 +140,7 @@ requests.post(url, json=data, headers).json()
 请求的json数据
 ```json
 {
-  "lang": "cpp",//c cpp pas
+  "lang": "cpp",//c cpp 不支持pascal
   "code": "int main() { return 0; }",
   "max_time": 1000,
   "max_memory": 256,//mb
@@ -182,34 +182,30 @@ aplusb3.in aplusb3.out
 
 ### 返回数据
 
-If something is wrong (data is missing or some part of request is missing), server will return:
+首先你要有一个`http`服务器来接收评测机发送的数据,`http`服务器的地址,就是上面的`r_url`参数
+
+如果测试成功,返回的数据
 ```json
 {
-  "status": "reject"
+    "data":[],
+    "verdict":0,
+    "revert":"revert"
 }
 ```
-Otherwise, `status` will be `received`.
 
-Then, submission will be under processing. If `COMPILE_ERROR` occurred:
+否则数据如下:
+
 ```json
 {
-  "id": 302,
-  "message": "... In function 'int main()':\n/ju...",
+  "data": "... In function 'int main()':\n/ju...",
   "verdict": 6,
-  "status": "received"
+  "revert":"revert"
 }
 ```
 
-Otherwise,
-```json
-{
-  "id": 304, 
-  "memory": 3052, 
-  "status": "received", 
-  "time": 588, 
-  "verdict": 0,
-  "detail": [{"count": 1, "memory": 2944, "time": 16, "verdict": 0}, {"count": 2, "memory": 2944, "time": 16, "verdict": 0}]
-}
+一个简单的`node http 服务器如下 `
+
+
 ```
 
 "verdict"数据的含义如下:
