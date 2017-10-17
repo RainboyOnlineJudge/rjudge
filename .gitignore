@@ -4,3 +4,6 @@ _test/
 testlib/build/
 .idea/
 *.pyc
+judger/output/
+judger/build/
+judger/bindings/Python/build/
