@@ -42,17 +42,18 @@ def run_judge(not_use,config_data,key,val,count):
             result["memory"] > config_data["max_memory"]*1024*1024):
         result["result"]  = MEMORY_LIMIT_EXCEEDED;
     # A fake time limit / memory limit exceeded
-    if result['cpu_time'] > config_data["max_time"] or result['result'] == CPU_TIME_LIMIT_EXCEEDED \
+    elif result['cpu_time'] > config_data["max_time"] or result['result'] == CPU_TIME_LIMIT_EXCEEDED \
             or result['result'] == REAL_TIME_LIMIT_EXCEEDED:
                 result['cpu_time'] = config_data["max_time"]
                 result['result'] = CPU_TIME_LIMIT_EXCEEDED
-    if result['result'] == MEMORY_LIMIT_EXCEEDED:
+    elif result['result'] == MEMORY_LIMIT_EXCEEDED:
         result['memory'] = config_data["max_memory"]
 
-    if result['result'] == 0:
+    elif result['result'] == 0:
         res_judge = _result_checker(config_data,in_path,out_path,ans_path)
+        # print("res_judge %d" % res_judge)
         if(res_judge !=0):
-            verdict = WRONG_ANSWER
+            result['result']= WRONG_ANSWER
 
     verdict = result['result']
     return dict(
@@ -95,5 +96,6 @@ def _run_args(config_data,in_path,out_path,log_path):
 def _result_checker(config_data,in_path,out_path,ans_path):
     running_path = os.path.join(config_data["round_dir"], 'spj')
     time_limit = int(config_data["max_time"]/ 1000 * 10)
-
+    # print("out_path: %s" % out_path)
+    # print("ans_path: %s" % ans_path)
     return subprocess.call([running_path, in_path, out_path, ans_path],stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=time_limit)

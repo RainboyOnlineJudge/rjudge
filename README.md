@@ -61,7 +61,6 @@ echo "server:5978" >/etc/rsyncd.secrets
 
 ### 同步数据的方法1:使用rsync
 
-
 ```
 #建立一个密码文件
 sudo echo 5978 > /etc/rsyncd.secret
@@ -148,6 +147,7 @@ requests.post(url, json=data, headers).json()
   "r_url":",",//要返回数据的地址
   "judge": "fcmp",
   "revert":{//返回数据的时候把这个部分同样返回
+    "id":"your_id"
   }
 }
 ```
@@ -221,6 +221,19 @@ COMPILE_ERROR = 6
 IDLENESS_LIMIT_EXCEEDED = 7
 SUM_TIME_LIMIT_EXCEEDED = 8
 ```
+
+result 的结果如下
+
+```
+[
+    {result:,memory,time,count}
+]
+```
+
+count 代表是第几个评测
+memory kb
+
+
 
 Okay, that pretty much nails it! Good luck!
 

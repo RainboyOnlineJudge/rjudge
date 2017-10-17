@@ -1,1 +1,0 @@
-/usr/bin/cc  -fPIC -Wall -Werror -O3 -std=c99  -shared -Wl,-soname,libjudger.so -o ../output/libjudger.so CMakeFiles/judger.dir/src/killer.o CMakeFiles/judger.dir/src/runner.o CMakeFiles/judger.dir/src/child.o CMakeFiles/judger.dir/src/logger.o CMakeFiles/judger.dir/src/rules/general.o CMakeFiles/judger.dir/src/rules/c_cpp.o -lpthread -lseccomp 

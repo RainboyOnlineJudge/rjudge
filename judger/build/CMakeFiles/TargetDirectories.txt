@@ -1,7 +1,0 @@
-/home/judgerserver/rjudge/judger/build/CMakeFiles/install.dir
-/home/judgerserver/rjudge/judger/build/CMakeFiles/list_install_components.dir
-/home/judgerserver/rjudge/judger/build/CMakeFiles/rebuild_cache.dir
-/home/judgerserver/rjudge/judger/build/CMakeFiles/judger.dir
-/home/judgerserver/rjudge/judger/build/CMakeFiles/install/local.dir
-/home/judgerserver/rjudge/judger/build/CMakeFiles/install/strip.dir
-/home/judgerserver/rjudge/judger/build/CMakeFiles/edit_cache.dir
