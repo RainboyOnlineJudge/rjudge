@@ -19,7 +19,7 @@ ENV LC_ALL en_US.UTF-8
 
 # Copy main code
 
-RUN mkdir -p /var/www/rjudge
+RUN mkdir -p /var/www/rjudge && mkdir ~/.pip/
 COPY . /var/www/rjudge/
 WORKDIR /var/www/rjudge
 
@@ -39,6 +39,7 @@ RUN cd judger && ./runtest.sh; exit 0
 # Install checker
 RUN cd testlib && ./build.sh
 
+COPY pip.conf ~/.pip/
 RUN pip3 install -r requirements.txt
 RUN mkdir -p /judge_server /judge_server/round /judge_server/data /judge_server/tmp
 RUN chmod 600 token.txt

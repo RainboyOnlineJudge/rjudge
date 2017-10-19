@@ -43,7 +43,7 @@ app.config['broker_url'] = 'redis://localhost:6379/0'
 app.config['result_backend'] = 'redis://localhost:6379/0'
 # app.config['imports'] = ['core.judge', 'core.post', 'core.compile']
 app.config['imports'] = ['core.judge', 'core.post', 'core.compile']
-app.config['worker_concurrency'] = max(cpu_count() // 2, 1)
+app.config['worker_concurrency'] = max(cpu_count(), 1)
 
 celery = Celery(app.name, broker=app.config['broker_url'])
 celery.conf.update(app.config)
