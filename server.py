@@ -1,17 +1,42 @@
 import shortuuid
+import time
 import platform
 import uuid
 import traceback
 import shutil
-from flask import request, jsonify
+from flask import request, jsonify,request
+from flask_socketio import SocketIO,emit,disconnect
 from core.handler import Handler
 from config import *
-from core.utils import randomize_round_id
+from core.utils import randomize_round_id,j
+import flask_login
+
+
+socket_clients = {}
+socket_clients_list = []
+
+class Socket:
+    def __init__(self, sid):
+        self.sid = sid
+        self.connected = True
+    # Emits data to a socket's unique room
+    def emit(self, event, data):
+       emit(event, data,namespace='/judge',room=self.sid)
+
+def timeinv():
+    global socket_clients
+    global socket_clients_list
+    if socket_clients_list[0]:
+        socket_clients[socket_clients_list[0] ].emit("my_response",{'data':'can you hear me'})
+
+
+socketio = SocketIO(app)
 
 PORT = 4999
 
 @app.route('/')
 def hello_world():
+    timeinv()
     return 'Hello World!'
 
 def verify_token(data):
@@ -31,17 +56,63 @@ def verify_token(data):
 def reset_token():
     return 'hello world'
 
+@socketio.on('connect',namespace='/judge')
+def test_connect():
+    socket_clients[request.sid]= Socket(request.sid)
+    socket_clients_list.append(request.sid)
+    emit('my_response',{'data':"connected","count":0})
 
-@app.route('/judge', methods=['POST'])
-def server_judge():
+@socketio.on('disconnect', namespace='/judge')
+def test_disconnect():
+    print("disconnected %s" % request.sid)
+    print('Client disconnected')
+
+@socketio.on('disconnect',namespace='/judge')
+def test_disconnect():
+    print("Client disconnected",request.sid)
+
+@socketio.on('disconnect_request', namespace='/judge')
+def disconnect_request():
+    print("Client disconnected--\n\n\n")
+    disconnect()
+
+@socketio.on('my_event', namespace='/judge')
+def test_message(message):
+    print(message)
+    emit("my_response",{'data':message['data']})
+
+
+# 请求评测,数据如下：
+@socketio.on('request_judge', namespace='/judge')
+def test_message(data):
+    judge_client_id = request.sid
     round_id = randomize_round_id()
-    token = request.headers.get('Token')
-    if not verify_token(token):
-        return jsonify({'status':-1,message:"illegal token"})
-    __data = request.get_json()
-    hh=Handler(__data,round_id)
-    hh.run()
-    return jsonify({"message":"ok"})
+    judge_data= judge_data_checker(data)
+    if isinstance(judge_data,str):
+        emit("judge_response",{
+                status:0,
+                message:judge_data
+            })
+    else:
+        judge_data['judge_client_id']=judge_client_id
+        emit("judge_response",{status:0,mid:START_JUDGE})
+
+
+# @socketio.on('my_event', namespace='/judge')
+# def test_message(message):
+    # emit('my_response', {'data': message['data']})
+
+
+# @app.route('/judge', methods=['POST'])
+# def server_judge():
+    # round_id = randomize_round_id()
+     # token = request.headers.get('Token')
+    # if not verify_token(token):
+        # return jsonify({'status':-1,message:"illegal token"})
+    # __data = request.get_json()
+    # hh=Handler(__data,round_id)
+    # hh.run()
+    # return jsonify({"message":"ok"})
 
 
 @app.route('/info', methods=['GET'])
@@ -103,4 +174,5 @@ def server_info():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=PORT, debug=False)
+    # app.run(host='0.0.0.0', port=PORT, debug=False)
+    socketio.run(app,host='0.0.0.0',debug=True)

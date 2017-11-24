@@ -38,6 +38,11 @@ IDLENESS_LIMIT_EXCEEDED = 7
 SUM_TIME_LIMIT_EXCEEDED = 8
 
 
+# socket respone message ID
+
+START_JUDGE=1
+
+
 app = Flask(__name__)
 app.config['broker_url'] = 'redis://localhost:6379/0'
 app.config['result_backend'] = 'redis://localhost:6379/0'

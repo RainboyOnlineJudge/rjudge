@@ -58,3 +58,42 @@ def randomize_round_id():
 
 def random_string(length):
     return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
+
+
+def judge_data_tranform(data):
+    return data
+
+def judge_data_checker(data):
+    judge_data_set = set(['code', 'lang', 'time', 'memory', 'judge_id', 'cmp', 'judger', 'revert','outut_size'])
+    lang_set = set(['c','cpp','pascal','python'])
+    defalut_judge_data = {
+            'judger':'qjudge',
+            'memory':512,
+            'stack':512,
+            'time':1,
+            'output_size':512,
+            'judge_id':'',
+            'lang':'cpp',
+            'code':'',
+            'cmp':'fcmp2',
+            'revert':{}
+    }
+    for key in data:
+        if key not in judge_data_set:
+            return key +' is illegal'
+        else:
+            defalut_judge_data[key] = data[key]
+    if defalut_judge_data['lang'] not in lang_set:
+        return 'item lang'+defalut_judge_data[key]+'is illegal'
+    if defalut_judge_data['judge_id'] == '':
+        return 'item judge_id should not empty'
+    if defalut_judge_data['judger'] != 'qjudge' or defalut_judge_data['judger'] != 'ujudge':
+        return 'item judger wrong'
+
+    if defalut_judge_data['code'] == '':
+        return 'item code should not empty'
+
+    # return judge_data_tranform(defalut_judge_data)
+    return defalut_judge_data
+
+
