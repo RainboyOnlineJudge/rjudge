@@ -3,6 +3,7 @@ import os
 import re
 import random
 import string
+import chardet
 
 
 def import_data(path):
@@ -64,7 +65,7 @@ def judge_data_tranform(data):
     return data
 
 def judge_data_checker(data):
-    judge_data_set = set(['code', 'lang', 'time', 'memory', 'judge_id', 'cmp', 'judger', 'revert','outut_size'])
+    judge_data_set = set(['stack_limit','code', 'lang', 'time', 'memory', 'judge_id', 'cmp', 'judger', 'revert','outut_size'])
     lang_set = set(['c','cpp','pascal','python'])
     defalut_judge_data = {
             'judger':'qjudge',
@@ -87,8 +88,8 @@ def judge_data_checker(data):
         return 'item lang'+defalut_judge_data[key]+'is illegal'
     if defalut_judge_data['judge_id'] == '':
         return 'item judge_id should not empty'
-    if defalut_judge_data['judger'] != 'qjudge' or defalut_judge_data['judger'] != 'ujudge':
-        return 'item judger wrong'
+    if defalut_judge_data['judger'] != 'qjudge' and defalut_judge_data['judger'] != 'ujudge':
+        return 'item judger wrong:'+defalut_judge_data['judger']
 
     if defalut_judge_data['code'] == '':
         return 'item code should not empty'

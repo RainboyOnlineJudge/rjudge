@@ -20,6 +20,7 @@ class Handler(object):
                 max_time:
                 max_memory:
         '''
+        # 初始化设定
         self.settings  = RoundSettings(data,round_id)
         pass
 

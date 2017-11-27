@@ -8,7 +8,7 @@ from flask import request, jsonify,request
 from flask_socketio import SocketIO,emit,disconnect
 from core.handler import Handler
 from config import *
-from core.utils import randomize_round_id,j
+from core.utils import randomize_round_id,judge_data_checker
 import flask_login
 
 
@@ -36,7 +36,6 @@ PORT = 4999
 
 @app.route('/')
 def hello_world():
-    timeinv()
     return 'Hello World!'
 
 def verify_token(data):
@@ -89,13 +88,24 @@ def test_message(data):
     round_id = randomize_round_id()
     judge_data= judge_data_checker(data)
     if isinstance(judge_data,str):
+        # 返回错误信息
         emit("judge_response",{
-                status:0,
-                message:judge_data
+                'status':-1,
+                'message':judge_data
             })
     else:
         judge_data['judge_client_id']=judge_client_id
-        emit("judge_response",{status:0,mid:START_JUDGE})
+        # 开始评测
+
+        # 0 根据judge_data 生成qjudge 或者 rjudge 调用数据 setting 来初始化
+
+        round_id = randomize_round_id()
+        hh=Handler(judge_data,round_id)
+
+
+        emit("judge_response",{
+            'status':0,
+            'mid':START_JUDGE})
 
 
 # @socketio.on('my_event', namespace='/judge')

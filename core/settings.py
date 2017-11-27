@@ -17,24 +17,26 @@ class RoundSettings:
         :param round_id: round id
         """
 
-        
+
+
+
         self.revert = None
         if "revert" in  data:
             self.revert = data["revert"]
 
-        self.r_url = data["r_url"]
-
-        self.judger_indicator = ''
-        if 'judger_indicator' in data:
-            self.judger_indicator =data['judger_indicator']
+        
+        # 文件比较器
+        self.cmp= ''
+        if 'cmp' in data:
+            self.cmp =data['cmp']
 
         self.code = data['code']
-        self.max_time = data['max_time']
-        # self.max_sum_time = data['max_sum_time']
-        self.max_memory = data['max_memory']
-        self.problem_id = data['problem_id']
+        self.time = data['time']
+        self.memory = data['memory']
+        self.judge_id = data['judge_id']
         self.round_id = round_id
-        self.data_dir = os.path.join(DATA_DIR, str(self.problem_id))
+        self.data_dir = os.path.join(DATA_DIR, str(self.judge_id))
+        # 执行代码的目录
         self.round_dir = os.path.join(ROUND_DIR, str(self.round_id))
 
         self.language_settings = LANGUAGE_SETTINGS[data['lang']]
@@ -64,6 +66,14 @@ class RoundSettings:
             max_memory=self.max_memory
         ).split(' ')
 
+        # 生成传递给 不同judge的 参数
+        # self.judge_args
+        self.judge_args = {}
+        if data['judger'] == 'qjudge' :
+            slef.judge_args['max_cpu_time'] = ''
+            slef.judge_args['max_real_time'] = ''
+        elif data['judger'] == 'ujudge' :
+            pass
 
         # 源代码
 
