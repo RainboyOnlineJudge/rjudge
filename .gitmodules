@@ -1,3 +1,6 @@
 [submodule "checker"]
 	path = checker
 	url = ../checker.git
+[submodule "ujudge"]
+	path = ujudge
+	url = ../ujudge.git
