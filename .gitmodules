@@ -4,3 +4,6 @@
 [submodule "ujudge"]
 	path = ujudge
 	url = ../ujudge.git
+[submodule "qjudge"]
+	path = qjudge
+	url = ../Judger.git
