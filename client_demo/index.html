@@ -3,8 +3,31 @@
     <title>rjudge server client demo</title>
     <script src="jquery.min.js"> </script>
     <script src="socket.io.min.js"> </script>
+    <style>
+      input,textarea {
+        display:list-item;
+        margin:10px;
+      }
+    </style>
   </head>
   <body>
+  <div id="toolbar">
+    <form id="emit" method="POST" action='#'>
+      <span>message</span><input type="text" name="emit_data" id="emit_data" placeholder="Message">
+      <span>judge_id</span><input type="text" id="judge_id" placeholder="judge_id">
+      <span>judger</span><input type="text" id="judger" placeholder="judger">
+      <span>time</span><input type="text" id="time" placeholder="time">
+      <span>memory</span><input type="text" id="memory" placeholder="memory">
+      <span>stack limit</span><input type="text" id="stack_limit" placeholder="stack_limit">
+      <span>lang</span><input type="text" id="lang" placeholder="lang">
+        <textarea id="code">
+        </textarea>
+        <input type="submit" value="Echo">
+    </form>
+  </div>
+
+  <div id="log">
+  </div>
     <script src="client.js"></script>
   </body>
 </html>
