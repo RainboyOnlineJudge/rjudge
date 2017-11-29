@@ -8,6 +8,8 @@ from .post import post_data
 from .utils import read_partial_data_from_file
 
 '''
+编译code,
+编译/复制spj
 参数:
     config_data:
         code 代码

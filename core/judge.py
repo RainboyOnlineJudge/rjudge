@@ -23,6 +23,18 @@ key:in_file 输入文件
 val:out_file 输出文件
 count:idx  编号,第几个测试点
 
+
+config_data:
+    time
+    memroy
+    outputsize
+    stack
+    in      输入文件
+    out     输出文件
+    rule
+    round_dir 运行目录
+    cmp 比较器
+
 '''
 @celery.task
 def run_judge(not_use,config_data,key,val,count):

@@ -5,7 +5,8 @@ from .settings import RoundSettings
 from .judge import run_judge
 from .post import post_data
 from .compile import compile
-from .utils import import_data,randomize_round_id
+from config import *
+from .utils import import_data,randomize_round_id,emit_to_one
 
 
 class Handler(object):
@@ -26,7 +27,20 @@ class Handler(object):
 
     #评测
     def run(self):
-        data_set = import_data(self.settings.data_dir)
+        # 测试数据是否正确
+        data = import_data(self.settings.data_dir)
+
+        if data.status != 0:
+            data['mid'] = PREPARE_JUDGE
+            emit_to_one(self.judge_client_id,data)
+            return 
+        elif len(data.result) ==0:
+            emit_to_one(self.judge_client_id,{
+                'status':-1,
+                'mid':PREPARE_JUDGE,
+                'message':'没有找到数据文件!'
+                })
+            return
 
         __data = {
                 "code":self.settings.code,
@@ -48,14 +62,14 @@ class Handler(object):
                 "revert":self.settings.revert
                 }
 
-        ss = [run_judge.s(__data2,key,val,idx)
-                          for idx, (key, val) in enumerate(data_set, start=1)]
-        cc = compile.s(
-                __data,
-                self.settings.src_path,
-                self.settings.compile_cmd,
-                self.settings.compile_out_path,
-                self.settings.compile_log_path,
-                self.settings.round_dir,
-                self.settings.language_settings['env'])|group(ss)|post_data.s(self.settings.r_url,self.settings.revert)
-        cc()
+        # ss = [run_judge.s(__data2,key,val,idx)
+                          # for idx, (key, val) in enumerate(data_set, start=1)]
+        # cc = compile.s(
+                # __data,
+                # self.settings.src_path,
+                # self.settings.compile_cmd,
+                # self.settings.compile_out_path,
+                # self.settings.compile_log_path,
+                # self.settings.round_dir,
+                # self.settings.language_settings['env'])|group(ss)|post_data.s(self.settings.r_url,self.settings.revert)
+        # cc()

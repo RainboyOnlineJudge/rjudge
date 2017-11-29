@@ -1,8 +1,7 @@
-celery
-Flask
+celery==4.1.0
+Flask==0.12.2
 redis
-requests
-shortuuid
+shortuuid==0.5.0
 gunicorn
 gevent
-flask_socketio
+flask_socketio==2.9.2

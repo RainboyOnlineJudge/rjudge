@@ -9,7 +9,6 @@ from flask_socketio import SocketIO,emit,disconnect
 from core.handler import Handler
 from config import *
 from core.utils import randomize_round_id,judge_data_checker
-import flask_login
 
 
 socket_clients = {}
