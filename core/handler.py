@@ -9,6 +9,7 @@ from config import *
 from .utils import import_data,randomize_round_id,emit_to_one
 
 
+
 class Handler(object):
 
     def __init__(self,data,round_id):
@@ -18,8 +19,6 @@ class Handler(object):
             language: c,cpp,pas
             code:评测代码
             setting:评测的相关设定
-                max_time:
-                max_memory:
         '''
         # 初始化设定
         self.settings  = RoundSettings(data,round_id)
@@ -29,47 +28,72 @@ class Handler(object):
     def run(self):
         # 测试数据是否正确
         data = import_data(self.settings.data_dir)
+        # print(data)
+        
 
-        if data.status != 0:
+        if data['status']!= 0:
             data['mid'] = PREPARE_JUDGE
-            emit_to_one(self.judge_client_id,data)
+            data['revert'] = self.settings.revert
+            emit_to_one(self.settings.judge_client_id,data)
             return 
-        elif len(data.result) ==0:
-            emit_to_one(self.judge_client_id,{
-                'status':-1,
-                'mid':PREPARE_JUDGE,
-                'message':'没有找到数据文件!'
-                })
-            return
 
-        __data = {
+        # 返回数据长度
+        emit_to_one(self.settings.judge_client_id,{
+            'status':0,
+            'message':'评测数据正常',
+            'data':data['result'],
+            'mid':PREPARE_JUDGE,
+            'revert':self.settings.revert
+            })
+        
+        # for debug 输出 round dir
+        print(self.settings.round_dir)
+
+        for_compile_data = {
                 "code":self.settings.code,
-                "r_url":self.settings.r_url,
                 "data_dir":self.settings.data_dir,
                 "round_dir":self.settings.round_dir,
-                "judger_indicator":self.settings.judger_indicator,
+                "judge_client_id":self.settings.judge_client_id,
+                "cmp":self.settings.cmp,
                 "revert":self.settings.revert
         }
-        __data2 = {
-                "max_time":self.settings.max_time,
-                "max_memory":self.settings.max_memory,
+        for_judge_data = {
+                "time":self.settings.time,
+                "memory":self.settings.memory,
+                "output_size":self.settings.output_size,
+                "judger":self.settings.judger,
                 "run_cmd":self.settings.run_cmd,
                 "env":self.settings.language_settings["env"],
                 "rule":self.settings.language_settings["seccomp_rule"],
                 "data_dir":self.settings.data_dir,
                 "round_dir":self.settings.round_dir,
-                "judger_indicator":self.settings.judger_indicator,
+                "cmp":self.settings.cmp,
+                "judge_client_id":self.settings.judge_client_id,
                 "revert":self.settings.revert
-                }
+        }
 
-        # ss = [run_judge.s(__data2,key,val,idx)
-                          # for idx, (key, val) in enumerate(data_set, start=1)]
-        # cc = compile.s(
-                # __data,
+        groups = [run_judge.s(for_judge_data,key,val,idx)
+                          for idx, (key, val) in enumerate(data, start=1)]
+        # task_series = compile.s(
+                # for_compile_data,
                 # self.settings.src_path,
                 # self.settings.compile_cmd,
                 # self.settings.compile_out_path,
                 # self.settings.compile_log_path,
                 # self.settings.round_dir,
-                # self.settings.language_settings['env'])|group(ss)|post_data.s(self.settings.r_url,self.settings.revert)
-        # cc()
+                # self.settings.language_settings['env'])
+                # |group(ss)|post_data.s(self.settings.r_url,self.settings.revert)
+        task_series = compile.s(
+                self.settings.code, #code
+                self.settings.data_dir,#data_dir
+                self.settings.round_dir,#round_dir
+                self.settings.judge_client_id,
+                self.settings.cmp,
+                self.settings.revert,
+                self.settings.src_path,
+                self.settings.compile_cmd,
+                self.settings.compile_out_path,
+                self.settings.compile_log_path,
+                self.settings.language_settings['env']
+                ) | group(groups) |post_data(self.settings.judge_client_id,self.settings.revert)
+        task_series()

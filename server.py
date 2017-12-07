@@ -29,7 +29,7 @@ def timeinv():
         socket_clients[socket_clients_list[0] ].emit("my_response",{'data':'can you hear me'})
 
 
-socketio = SocketIO(app)
+socketio = SocketIO(app,message_queue="redis://localhost:6379/1")
 
 PORT = 4999
 
@@ -83,6 +83,7 @@ def test_message(message):
 # 请求评测,数据如下：
 @socketio.on('request_judge', namespace='/judge')
 def test_message(data):
+    print(data)
     judge_client_id = request.sid
     round_id = randomize_round_id()
     judge_data= judge_data_checker(data)
@@ -100,11 +101,7 @@ def test_message(data):
 
         round_id = randomize_round_id()
         hh=Handler(judge_data,round_id)
-
-
-        emit("judge_response",{
-            'status':0,
-            'mid':START_JUDGE})
+        hh.run()
 
 
 # @socketio.on('my_event', namespace='/judge')

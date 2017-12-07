@@ -1,20 +1,38 @@
+from config import *
 import uuid
 import os
 import re
 import random
 import string
 import chardet
-from flask_socketio import emit
+from flask_socketio import SocketIO,emit,disconnect
 
 
 def import_data(path):
     infile_re = ['.in$','.input$','.txt$']
-    outfile_re  = ['.out$','.output$','.ans$','.answer']
+    outfile_re  = ['.out$','.output$','.ans$','.answer$']
+
+    # 判断目录是否存在
+    if os.path.exists(path) == False:
+        return {
+                'status':-1,
+                'message':'数据目录不存在',
+                'err_code':1,
+                'data_dir':os.path.basename(path)
+                }
 
     raw_file_list = os.listdir(path)
     raw_file_set = set(raw_file_list)
 
     result = []
+
+    if len(raw_file_list)==0:
+        return {
+                'status':-1,
+                'message':'数据目录为空',
+                'err_code':2,
+                'data_dir':path
+                }
 
     # 为空
 
@@ -33,12 +51,12 @@ def import_data(path):
         return {
                 'status':-1,
                 'message':'没有找到in文件',
-                'datalist':raw_file_list
+                'err_code':3,
+                'raw_file_list':raw_file_list
                 }
 
-
     for in_file in raw_file_list:
-        if infile_pattern.search(in_file) is not None:
+        if real_infile_re.search(in_file) is not None:
             raw_file_set.remove(in_file)
             out_file=''
             for outfile in raw_file_set:
@@ -48,13 +66,21 @@ def import_data(path):
                     break
             # print(out_file)
             if out_file != '':
-                raw_file_set.remove(outfile)
+                raw_file_set.remove(out_file)
+
+    if len(result)==0:
+        return {
+                'status':-1,
+                'message':'数据文件匹配结果为空',
+                'raw_file_list':raw_file_list
+                }
+
 
     # print(result)
     # 按字典 infile序排序
     return {
             'status':0,
-            'result': sorted(result,key=lambda x:x[0].lower())
+            'result': sorted(result,key=lambda x:int(''.join(list(filter(str.isdigit,x[0])))))
             }
 
 
@@ -117,8 +143,8 @@ def judge_data_tranform(data):
     return data
 
 def judge_data_checker(data):
-    judge_data_set = set(['stack_limit','code', 'lang', 'time', 'memory', 'judge_id', 'cmp', 'judger', 'revert','outut_size'])
-    lang_set = set(['c','cpp','pascal','python'])
+    judge_data_set = set(['stack','code', 'lang', 'time', 'memory', 'judge_id', 'cmp', 'judger', 'revert','output_size'])
+    lang_set = set(['c','cpp','pas','python3'])
     defalut_judge_data = {
             'judger':'qjudge',
             'memory':512,
@@ -152,3 +178,7 @@ def judge_data_checker(data):
 # 发送soketio
 def emit_to_one(sid,data):
     emit('judge_response', data,namespace='/judge',room=sid)
+
+def mq_emit(sid,data):
+    socketio = SocketIO(message_queue=MESSAGE_QUEUE)
+    socketio.emit('judge_response',data,namespace='/judge',room=sid)

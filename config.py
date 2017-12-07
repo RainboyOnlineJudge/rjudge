@@ -9,7 +9,7 @@ import pwd
 # Judge server directories
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TESTLIB_BUILD_DIR = os.path.join(BASE_DIR, 'testlib/build')
+TESTLIB_BUILD_DIR = '/judge/checker'
 JUDGE_BASE_DIR = '/judge_server'
 JUDGE_BASE_DIR_PAST = '/judge_server_past'
 
@@ -38,20 +38,19 @@ IDLENESS_LIMIT_EXCEEDED = 7
 SUM_TIME_LIMIT_EXCEEDED = 8
 
 
+# socket respone message ID
 # MID 值
 PREPARE_JUDGE   =0
 START_JUDGE     =1
-AYANALIYSE_DATA =2
-COMPILE_COMLETE =3
-JUDGING         =4
-END_JUDGE       =5
+COMPILING       =2
+JUDGING         =3
+END_JUDGE       =4
 
+# 默认的stack_limit
 
+DEFAULT_STACK_LIMIT = 1024  # MB
 
-# socket respone message ID
-
-START_JUDGE=1
-
+MESSAGE_QUEUE = 'redis://localhost:6379/1'
 
 app = Flask(__name__)
 app.config['broker_url'] = 'redis://localhost:6379/0'

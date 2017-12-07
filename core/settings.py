@@ -19,6 +19,12 @@ class RoundSettings:
         """
 
         self.judge_client_id = data['judge_client_id']
+
+        self.judger = "qjudge"
+        if data["judger"]:
+            self.judger = data["judger"]
+
+
         self.revert = None
         if "revert" in  data:
             self.revert = data["revert"]
@@ -28,6 +34,10 @@ class RoundSettings:
         self.cmp= 'fcmp2'
         if 'cmp' in data:
             self.cmp =data['cmp']
+
+        self.output_size = 1024
+        if data["output_size"]:
+            self.output_size = data["output_size"]
 
         self.code = data['code']
         self.time = data['time']

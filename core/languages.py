@@ -28,7 +28,7 @@ LANGUAGE_SETTINGS = {
         "compile_cmd": "/usr/bin/fpc {src_path}",
         "exe_cmd": "{exe_path}",
         "seccomp_rule": "c_cpp",
-        "env": ['/usr/bin'] + _DEFAULT_ENV
+        "env": [] + _DEFAULT_ENV
     },
     'java': {
         "src_name": "Main.java",

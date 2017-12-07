@@ -1,0 +1,164 @@
+# coding:utf-8
+
+from config import *
+import shutil
+import _judger
+import os
+from .post import post_data
+from .utils import read_partial_data_from_file,emit_to_one
+
+'''
+编译code,
+编译/复制spj
+'''
+@celery.task
+def compile(
+        code='',        # 代码
+        data_dir='',    # 数据的目录
+        round_dir='',   # 运行的目录
+        judge_client_id='', # 返回的socket client id
+        _cmp='fcmp2',       # 文本比较器
+        revert={},          # 返回的数据
+        src_path='',        # 源代码路径
+        compile_cmd=[],     # 编译的 args
+        compile_out_path='/dev/null', # 输出路径
+        compile_log_path='/dev/null', # log 路径
+        language_settings=[]          # 针对各个语言的env
+        ):
+    print(round_dir)
+    # 写入代码
+    with open(src_path, 'w', encoding='utf-8') as f:
+        f.write(code)
+
+    # 编译代码
+    res = _judger.run(
+            max_cpu_time=5000,
+            max_real_time=10000,
+            max_memory=-1,
+            max_output_size=128 * 1024 * 1024,
+            max_process_number=_judger.UNLIMITED,
+            exe_path=compile_cmd[0],
+            # /dev/null is best, but in some system, this will call ioctl system call
+            input_path=src_path,
+            output_path=compile_out_path,
+            error_path=compile_out_path,
+            args=compile_cmd[1:],
+            env=["PATH=" + os.getenv("PATH")] + language_settings,
+            log_path=compile_log_path,
+            seccomp_rule_name=None,
+            uid=COMPILER_USER_UID,  # not safe?
+            gid=COMPILER_GROUP_GID
+            )
+    # print(res)
+
+    if res['result']!= 0 :
+        payload = { 'status':-1,'mid':COMPILING,'verdict':COMPILE_ERROR, 'message':'N/A' ,'revert':revert}
+        if os.path.exists(compile_out_path):
+            payload['message'] = read_partial_data_from_file(compile_out_path)
+            if payload['message'] == '' and os.path.exists(compile_log_path):
+                payload['message'] = read_partial_data_from_file(compile_log_path)
+            payload['message'] = payload['message'].replace(round_dir, '~')
+        emit_to_one(judge_client_id,payload)
+        raise Exception('compile error!')
+    
+    
+    # _file_checher 这里只运行一遍
+    _file_checher(round_dir = round_dir,_cmp = _cmp,data_dir = data_dir,judge_client_id = judge_client_id)
+
+
+#设置spj,file checher 
+def _file_checher(
+        _cmp='',
+        round_dir='',
+        data_dir='',
+        judge_client_id=''
+        ):
+
+    running_path = os.path.join(round_dir, 'spj')
+
+    if _cmp == '':
+        _cmp = 'fcmp2'
+
+    # 判断是不是有后缀名
+    search_path = ''
+    extname = os.path.splitext(_cmp)[1]  #cpp
+    if extname == '.cpp':  #cpp
+        search_path =os.path.join(data_dir,_cmp)
+        running_path = running_path+extname
+    elif extname == '':  #无后缀
+        search_path =os.path.join(TESTLIB_BUILD_DIR,_cmp)
+    else :
+        emit_to_one(judge_client_id,{'status':-1,'mid':COMPILING,'message':'do not support this cmp:'+_cmp +' yet!'})
+        raise Exception('do not support this cmp:'+_cmp +' yet!');
+
+    # 复制 
+
+    if os.path.exists(search_path):
+        shutil.copyfile(search_path,running_path)
+    else :
+        emit_to_one(judge_client_id,{'status':-1,'mid':COMPILING,'message':'cmp:'+_cmp +'is not exists!'})
+        raise Exception('cmp not exists');
+
+    # 编译spj
+    compile_spj_res = {'status':0}
+    if extname == '':
+        pass
+    elif extname == '.cpp':
+        compile_spj_res = __compile__(
+            compile_cmd=['/usr/bin/g++','-o','spj',search_path],
+            round_dir=round_dir,
+            compile_out_path=os.path.join(round_dir,'spj.out'),
+            compile_log_path=os.path.join(round_dir,'spj.log'),
+            src_path=search_path,
+            language_settings=[]
+            )
+    else :
+        emit_to_one(judge_client_id,{'status':-1,'mid':COMPILING,
+            'message':'do not support this cmp:'+_cmp})
+        raise Exception('do not support this cmp!');
+
+    if compile_spj_res['status'] != 0:
+        emit_to_one(judge_client_id,compile_spj_res)
+        raise Exception('spj compile error!');
+
+
+    os.chmod(running_path, 0o755)
+
+# 编译
+def __compile__(
+        compile_cmd=[],
+        round_dir='',
+        compile_out_path='',
+        compile_log_path='',
+        src_path='',
+        language_settings=''
+        ):
+    res = _judger.run(
+            max_cpu_time=5000,
+            max_real_time=10000,
+            max_memory=_judger.UNLIMITED,
+            max_output_size=128 * 1024 * 1024,
+            max_process_number=_judger.UNLIMITED,
+            exe_path=compile_cmd[0],
+            # /dev/null is best, but in some system, this will call ioctl system call
+            input_path=src_path,
+            output_path=compile_out_path,
+            error_path=compile_out_path,
+            args=compile_cmd[1:],
+            env=["PATH=" + os.getenv("PATH")] + language_settings,
+            log_path=compile_log_path,
+            seccomp_rule_name=None,
+            uid=COMPILER_USER_UID,  # not safe?
+            gid=COMPILER_GROUP_GID
+            )
+
+    if res['result']!= 0 :
+        payload = { 'status':-1,'mid':COMPILING,'verdict':COMPILE_ERROR, 'details':'N/A' ,'revert':revert}
+        if os.path.exists(compile_out_path):
+            payload['details'] = read_partial_data_from_file(compile_out_path)
+            if payload['details'] == '' and os.path.exists(compile_log_path):
+                payload['details'] = read_partial_data_from_file(compile_log_path)
+            payload['details'] = payload['details'].replace(round_dir, '~')
+        return payload
+    else:
+        return {'status':0,'mid':COMPILING,'revert':revert}
