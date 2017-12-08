@@ -83,7 +83,7 @@ def test_message(message):
 # 请求评测,数据如下：
 @socketio.on('request_judge', namespace='/judge')
 def test_message(data):
-    print(data)
+    # print(data)
     judge_client_id = request.sid
     round_id = randomize_round_id()
     judge_data= judge_data_checker(data)

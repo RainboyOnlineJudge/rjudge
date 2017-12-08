@@ -94,13 +94,13 @@ def run_judge(not_use,config_data,infile,ansfile,count):
     verdict = result['result']
 
     judge_ans = dict(
-        status:0,
+        status=0,
         count=count,
         mid=JUDGING,
         time=result['cpu_time'],
         memory=result['memory'],
         result=verdict,
-        details=ans_checker['details']      # 答案错误细节
+        details=ans_checker['details'],      # 答案错误细节
         revert=config_data['revert']
     )
 

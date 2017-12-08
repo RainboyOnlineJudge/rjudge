@@ -47,7 +47,7 @@ class Handler(object):
             })
         
         # for debug 输出 round dir
-        print(self.settings.round_dir)
+        # print(self.settings.round_dir)
 
         for_compile_data = {
                 "code":self.settings.code,
@@ -73,7 +73,7 @@ class Handler(object):
         }
 
         groups = [run_judge.s(for_judge_data,key,val,idx)
-                          for idx, (key, val) in enumerate(data, start=1)]
+                          for idx, (key, val) in enumerate(data["result"], start=1)]
         # task_series = compile.s(
                 # for_compile_data,
                 # self.settings.src_path,
@@ -95,5 +95,5 @@ class Handler(object):
                 self.settings.compile_out_path,
                 self.settings.compile_log_path,
                 self.settings.language_settings['env']
-                ) | group(groups) |post_data(self.settings.judge_client_id,self.settings.revert)
+                ) | group(groups) |post_data.s(self.settings.judge_client_id,self.settings.revert)
         task_series()
