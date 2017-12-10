@@ -29,7 +29,11 @@ def compile(
     with open(src_path, 'w', encoding='utf-8') as f:
         f.write(code)
 
-    compile_code_res = __compile__(
+    compile_code_res={}
+    if compile_cmd[0] == '/usr/bin/fpc':
+        compile_code_res["status"] = os.system(" ".join(compile_cmd))
+    else:
+        compile_code_res = __compile__(
                 compile_cmd = compile_cmd,
                 round_dir = round_dir,
                 src_path = src_path,
@@ -121,7 +125,28 @@ def __compile__(
         language_settings='',
         revert={}
         ):
-    res = _judger.run(
+    # print(compile_cmd)
+    # print(["PATH=" + os.getenv("PATH")] + language_settings)
+    res = {}
+    if compile_cmd[0] == '/usr/bin/fpc':
+        res = judge.run_program(
+                tl=10,   # time_limit 单位s 
+                ml=512, # memory_limit 单位 mb
+                ol=128, # output_limit 单位 mb
+                sl=512, # stack limit 单位 mb
+                _in="/dev/null",  # 输入文件
+                out=compile_out_path, # 输出文件
+                err=compile_out_path, # 错误输出
+                work_path=round_dir, # 工作目录
+                _type="default", # type default or python3.5
+                show_trace_details=False, # 显示详细的信息
+                allow_proc=False,         #  允许 fork exec
+                unsafe=True,             #  不安全模式
+                argv=compile_cmd,        # 运行的程序名
+                add_readable_raw=""
+                )
+    else:
+        res = _judger.run(
             max_cpu_time=5000,
             max_real_time=10000,
             max_memory=_judger.UNLIMITED,

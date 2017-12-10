@@ -163,7 +163,7 @@ def judge_data_checker(data):
         else:
             defalut_judge_data[key] = data[key]
     if defalut_judge_data['lang'] not in lang_set:
-        return 'item lang'+defalut_judge_data[key]+'is illegal'
+        return 'item lang <'+defalut_judge_data['lang']+'>is illegal'
     if defalut_judge_data['judge_id'] == '':
         return 'item judge_id should not empty'
     if defalut_judge_data['judger'] != 'qjudge' and defalut_judge_data['judger'] != 'ujudge':

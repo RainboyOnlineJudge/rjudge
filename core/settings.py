@@ -48,7 +48,8 @@ class RoundSettings:
         self.data_dir = os.path.join(DATA_DIR, str(self.judge_id))
         # 执行代码的目录
         self.round_dir = os.path.join(ROUND_DIR, str(self.round_id))
-
+        
+        self.lang = data['lang']
         self.language_settings = LANGUAGE_SETTINGS[data['lang']]
         # self.run_dir = self.settings.round_dir
 

@@ -27,7 +27,7 @@ LANGUAGE_SETTINGS = {
         "max_memory": 128 * 1024 * 1024,
         "compile_cmd": "/usr/bin/fpc {src_path}",
         "exe_cmd": "{exe_path}",
-        "seccomp_rule": "c_cpp",
+        "seccomp_rule": "general",
         "env": [] + _DEFAULT_ENV
     },
     'java': {
@@ -40,10 +40,10 @@ LANGUAGE_SETTINGS = {
         "seccomp_rule": None,
         "env": ["MALLOC_ARENA_MAX=1"] + _DEFAULT_ENV
     },
-    'python': {
+    'python3': {
         # A Naive solution of copy
-        "src_name": "solution.py",
-        "exe_name": "solution.py",  # TODO assign exe_path when compile
+        "src_name": "main.py",
+        "exe_name": "main.py",  # TODO assign exe_path when compile
         "max_memory": 128 * 1024 * 1024,
         "compile_cmd": "/usr/bin/python3 -m py_compile {src_path}",
         "exe_cmd": "/usr/bin/python3 {exe_path}",

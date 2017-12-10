@@ -13,13 +13,6 @@ from .utils import random_string,mq_emit
 参数:
     not_use  不使用,在task chain的时候会传递过来
     config_data:
-        max_time 最大时间,1000毫秒
-        max_memroy 最大内存,单位mb
-        run_cmd   运行命令,和language_settings 有关
-        env       环境变量
-        rule      c_cpp
-        data_dir  原始数据路径
-        round_dir 运行的路径
 infile:in_file 输入文件
 outfile:out_file 输出文件
 count:idx  编号,第几个测试点
@@ -57,6 +50,7 @@ def run_judge(not_use,config_data,infile,ansfile,count):
     ## 得到
     run_args = _run_args(config_data,in_path,out_path,log_path);
     # 选择使用的评测机
+    # print(run_args)
     result = {}
     if config_data['judger'] == 'ujudge':
         result = judge.run_program(**run_args)

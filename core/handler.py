@@ -66,6 +66,7 @@ class Handler(object):
                 "env":self.settings.language_settings["env"],
                 "rule":self.settings.language_settings["seccomp_rule"],
                 "data_dir":self.settings.data_dir,
+                "lang":self.settings.lang,
                 "round_dir":self.settings.round_dir,
                 "cmp":self.settings.cmp,
                 "judge_client_id":self.settings.judge_client_id,

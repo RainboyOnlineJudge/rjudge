@@ -91,7 +91,7 @@ def test_message(data):
         # 返回错误信息
         emit("judge_response",{
                 'status':-1,
-                'message':judge_data
+                'details':judge_data
             })
     else:
         judge_data['judge_client_id']=judge_client_id
