@@ -3,6 +3,7 @@
 from config import *
 import shutil
 import _judger
+import judge   # 导入 ujudge
 import os
 from .post import post_data
 from .utils import read_partial_data_from_file,mq_emit
@@ -30,10 +31,10 @@ def compile(
         f.write(code)
 
     compile_code_res={}
-    if compile_cmd[0] == '/usr/bin/fpc':
-        compile_code_res["status"] = os.system(" ".join(compile_cmd))
-    else:
-        compile_code_res = __compile__(
+    # if compile_cmd[0] == '/usr/bin/fpc':
+        # compile_code_res["status"] = os.system(" ".join(compile_cmd))
+    # else:
+    compile_code_res = __compile__(
                 compile_cmd = compile_cmd,
                 round_dir = round_dir,
                 src_path = src_path,
@@ -41,7 +42,7 @@ def compile(
                 compile_log_path=compile_log_path,
                 language_settings = language_settings,
                 revert= revert
-            )
+                )
     if compile_code_res['status'] != 0: # 错误
         compile_code_res['message'] = '代码编译失败';
         compile_code_res['err_code'] = 1
