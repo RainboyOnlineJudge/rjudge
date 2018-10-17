@@ -1,3 +1,10 @@
+## 使用了哪些包/软件
+
+ - [Flask](http://flask.pocoo.org/) [中文文档](https://dormousehole.readthedocs.io/en/latest/) 提供http服务
+ - [celery](http://www.celeryproject.org/)  提高任务队列服务
+ - [Flask-SocketIO](https://github.com/miguelgrinberg/Flask-SocketIO) 提供socket服务
+ - [Redis](https://redis.io/)   celery与socket的后端
+
 ## 运行过程
 
 ```
